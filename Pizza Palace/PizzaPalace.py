@@ -19,7 +19,6 @@ The interface includes the following screens:
 8. Login screen: Sign in or register for account and order history.
 """
 
-
 import tkinter as tk
 from tkinter import messagebox
 from PIL import Image, ImageTk
@@ -165,7 +164,7 @@ class PizzaPalace:
         crust_price = 2.0 if crust == "Stuffed" else 0.0
         price = base_price[size] + crust_price + 1.5 * len(toppings)
 
-        item = {"type": "pizza", "size": size, "crust": crust, "toppings": toppings, "quantity": quantity, "price": price}
+        item = {"type": "pizza", "size": size, "crust": crust, "toppings": toppings, "quantity": quantity, "price": price, "specialty": ""}
         self.cart.append(item)
         messagebox.showinfo("Added to Cart", "Your pizza has been added to the cart.")
 
@@ -225,7 +224,7 @@ class PizzaPalace:
                 self.cart_frames.append(item_frame)
 
                 if item['type'] == 'pizza':
-                    item_text = f"Pizza {index + 1}: Size - {item['size']}, Crust - {item['crust']}, Toppings - {', '.join(item['toppings'])}, Quantity - {item['quantity']}, Price - ${item['price'] * item['quantity']:.2f}"
+                    item_text = f"Pizza {index + 1}: Size - {item['size']}, Crust - {item['crust']}, Toppings - {', '.join(item['toppings'])}, Specialty - {item['specialty']}, Quantity - {item['quantity']}, Price - ${item['price'] * item['quantity']:.2f}"
                 else:
                     item_text = f"Beverage {index + 1}: {item['beverage']} x {item['beverage_quantity']}, Price - ${item['price']:.2f}"
                 tk.Label(item_frame, text=item_text, bg="#FFE461").pack(side=tk.LEFT)
@@ -369,7 +368,7 @@ class PizzaPalace:
         crust = self.crust_vars[item["name"]].get()
         base_price = item['price']
         price = base_price + self.size_prices[size] + self.crust_prices[crust]
-        self.cart.append({"type": "pizza", "size": size, "crust": crust, "toppings": [], "quantity": 1, "name": item['name'], "price": price})
+        self.cart.append({"type": "pizza", "size": size, "crust": crust, "toppings": [], "quantity": 1, "name": item['name'], "price": price, "specialty": item["name"]})
         messagebox.showinfo("Added to Cart", f"{item['name']} has been added to the cart.")
 
     def create_track_order_screen(self):
@@ -438,7 +437,6 @@ class PizzaPalace:
             window.destroy()
         else:
             messagebox.showwarning("Invalid Address", "Please enter a valid address.")
-
 
     def create_contact_us_screen(self):
         self.clear_screen()
@@ -534,7 +532,6 @@ class PizzaPalace:
         self.cart = []
         self.create_home_screen()
 
-
     def create_login_screen(self):
         self.clear_screen()
 
@@ -606,19 +603,22 @@ class PizzaPalace:
             tk.Label(frame, text="You have no order history.", bg="#FFE461").pack(pady=10)
         else:
             for order_index, order in enumerate(self.users[self.current_user]["order_history"]):
+                print(f"Processing Order {order_index + 1}: {order}")  # Debug print statement
                 order_frame = tk.Frame(frame, bg="#FFE461", borderwidth=2, relief="solid")
                 order_frame.pack(fill=tk.X, pady=5)
                 tk.Label(order_frame, text=f"Order {order_index + 1}", font=("Cooper Black", 12), bg="#FFE461").pack(pady=5)
                 for item in order:
-                    if item['size'] != "" or item['crust'] != "" or item['toppings']:
-                        item_text = f"Pizza: Size - {item['size']}, Crust - {item['crust']}, Toppings - {', '.join(item['toppings'])}, Quantity - {item['quantity']}, Price - ${item['price'] * item['quantity']:.2f}"
+                    print(f"Processing Item: {item}")  # Debug print statement
+                    item_type = item.get('type', 'unknown')
+                    if item_type == 'pizza':
+                        item_text = f"Pizza: Size - {item.get('size', 'Unknown')}, Crust - {item.get('crust', 'Unknown')}, Toppings - {', '.join(item.get('toppings', []))}, Specialty - {item.get('specialty', 'None')}, Quantity - {item.get('quantity', 1)}, Price - ${item.get('price', 0) * item.get('quantity', 1):.2f}"
+                    elif item_type == 'beverage':
+                        item_text = f"Beverage: {item.get('beverage', 'Unknown')} x {item.get('beverage_quantity', 1)}, Price - ${item.get('price', 0):.2f}"
                     else:
-                        item_text = f"Beverage: {item['beverage']} x {item['beverage_quantity']}, Price - ${item['price']:.2f}"
+                        item_text = "Unknown item"
                     tk.Label(order_frame, text=item_text, bg="#FFE461").pack(anchor=tk.W)
 
-        tk.Button(frame, text="Back to Home", command=self.create_home_screen).pack(pady=10, side=tk.BOTTOM)
-
-
+        tk.Button(frame, text="Back to Home", command=self.create_home_screen).pack(pady=10)
 
     def clear_screen(self):
         for widget in self.root.winfo_children():
@@ -648,3 +648,4 @@ if __name__ == "__main__":
     root = tk.Tk()
     app = PizzaPalace(root)
     root.mainloop()
+
